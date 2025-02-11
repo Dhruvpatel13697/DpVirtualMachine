@@ -9,7 +9,8 @@
 #include <errno.h>
 #include <dputils.h>
 
-#define ErrMem     0x01
+#define ErrMem      0x01
+#define NoArgs      {0x00, 0x00}
 
 typedef unsigned char int8;
 typedef unsigned short int int16;
@@ -71,7 +72,7 @@ struct s_instruction{
     Args a[]; // 0 - 2 byte
 };
 
-typedef struct s_instruction Instruction;
+typedef struct s_instruction *Instruction;
 
 
 typedef int8 stack[((unsigned int)(-1))];
@@ -91,6 +92,10 @@ static IM instrmap[] = {
     { nop, 0x01}
 };
 
-VM *virtualMachine(Program*, int16);
+#define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
+
+ Program exampleProgram(void);
+int8 map_inst(Opcode);
+VM *virtualMachine(Program, int16);
 
 int main(int,char**);
