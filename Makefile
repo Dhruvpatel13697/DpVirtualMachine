@@ -6,11 +6,11 @@ ldflags=
 
 all: clean dp_virtual_machin
 
-/mnt/c/Users/Dhruv\ Patel/dp_project/dp_virtual_machine/dputils/dputils.o:  /mnt/c/Users/Dhruv\ Patel/dp_project/dp_virtual_machine/dputils/dputils.c /mnt/c/Users/Dhruv\ Patel/dp_project/dp_virtual_machine/dputils/dputils.h
-	$(MAKE) -C /mnt/c/Users/Dhruv\ Patel/dp_project/dp_virtual_machine/dputils
+/mnt/c/Users/Dhruv\ Patel/dp_project/DpVirtualMachine/dputils/dputils.o:  /mnt/c/Users/Dhruv\ Patel/dp_project/DpVirtualMachine/dputils/dputils.c /mnt/c/Users/Dhruv\ Patel/dp_project/DpVirtualMachine/dputils/dputils.h
+	$(MAKE) -C /mnt/c/Users/Dhruv\ Patel/dp_project/DpVirtualMachine/dputils
 
-dp_virtual_machin: dp_virtual_machin.o /mnt/c/Users/Dhruv\ Patel/dp_project/dp_virtual_machine/dputils/dputils.o
-	cc $(flags) $< -o $@ $(ldflags) /mnt/c/Users/Dhruv\ Patel/dp_project/dp_virtual_machine/dputils/dputils.o
+dp_virtual_machin: dp_virtual_machin.o /mnt/c/Users/Dhruv\ Patel/dp_project/DpVirtualMachine/dputils/dputils.o
+	cc $(flags) $< -o $@ $(ldflags) /mnt/c/Users/Dhruv\ Patel/dp_project/DpVirtualMachine/dputils/dputils.o
 
 dp_virtual_machin.o: dp_virtual_machin.c dp_virtual_machin.h
 	cc $(flags) -c $<
