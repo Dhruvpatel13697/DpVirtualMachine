@@ -47,7 +47,7 @@ typedef struct s_cpu CPU;
 
 /*
     mov ax, 0x05; ( 0x01 or 0x02
-                    0000 0011 => first 1 for mov and second 1 for ax reg
+                    0000 0001 => first 1 for mov and second 0 for ax reg
                     0000 0000 0000 0000 => these 16 bit use for args ex. 0x05
                     )
 */
@@ -74,15 +74,28 @@ struct s_instruction{
 
 typedef struct s_instruction Instruction;
 
-typedef int8 Memory[((unsigned int)(-1))];
+typedef int8 Memory[((int16)(-1))];
 typedef int8 Program;
 
 struct s_vm
 {
     CPU c;
     Memory m;
-    Program *p;
+    int16 b; // break line
 };
+/*
+there is .text and .data section
+
+.text (+r -w +e)
+
+###########
+#####
+---------------------------  break line
+
+*****
+************
+.data (+r +w -e)
+*/
 
 typedef Memory *Stack;
 typedef struct s_vm VM;

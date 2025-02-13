@@ -109,11 +109,12 @@ Program *exampleProgram(VM *vm){
     }
 
     //load inst 2 in memory
-    copy($1 prog, $1 i1, 1);
+    copy($1 prog, $1 i2, 1);
+    vm->b = (s1 + s2);
     free(i1);
     free(i2);
 
-    return vm->m;
+    return (Program *)(&vm->m);
 
     
 }
@@ -123,10 +124,12 @@ int main(int argc, char *argv[]) {
     VM *vm;
     
     vm = virtualMachine();
-    printf("vm       = %p\n", vm);
+    printf("vm       = %p (size=%ld)\n", vm, sizeof(VM));
 
     prog = exampleProgram(vm);
     printf("program  = %p\n", prog);
+
+    printhex($1 prog, (map_inst(mov) + map_inst(nop)), ' ');
 
     return 0;
 }
