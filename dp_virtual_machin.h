@@ -72,19 +72,19 @@ struct s_instruction{
     Args a[]; // 0 - 2 byte
 };
 
-typedef struct s_instruction *Instruction;
+typedef struct s_instruction Instruction;
 
-
-typedef int8 stack[((unsigned int)(-1))];
-typedef Instruction Program;
+typedef int8 Memory[((unsigned int)(-1))];
+typedef int8 Program;
 
 struct s_vm
 {
     CPU c;
-    stack s;
+    Memory m;
     Program *p;
 };
 
+typedef Memory *Stack;
 typedef struct s_vm VM;
 
 static IM instrmap[] = {
@@ -94,8 +94,8 @@ static IM instrmap[] = {
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
- Program exampleProgram(void);
+ Program *exampleProgram(VM*);
 int8 map_inst(Opcode);
-VM *virtualMachine(Program, int16);
+VM *virtualMachine(void);
 
 int main(int,char**);
