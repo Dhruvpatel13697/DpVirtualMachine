@@ -80,7 +80,9 @@ enum s_opcode{
     mov = 0x08,
     nop = 0x10,
     hlt = 0x18,
-    add = 0x20
+    add = 0x20,
+    push = 0x28,
+    pop = 0x30
 };
 
 typedef int8 Opcode;
@@ -132,12 +134,17 @@ static IM instrmap[] = {
     { nop, 0x01},
     { hlt, 0x01},
     { add, 0x03},
+    { push, 0x03},
+    { pop, 0x01},
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
 void _add(VM*, int8, Args, Args);
 void _mov(VM*, int8, Args, Args);
+void _push(VM*, Args, Args);
+void _pop(VM*, int8);
+Instruction *copy_instruction(Program*, int16);
  Program *exampleProgram(VM*);
 void execute(VM*);
 void error(VM*, Errorcode);
