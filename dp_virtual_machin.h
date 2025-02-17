@@ -9,9 +9,13 @@
 #include <errno.h>
 #include <dputils.h>
 
-#define ErrMem      0x01
+#define NoErr       0x00         // 00 00
+#define SysHlt      0x01         // 00 01
+#define ErrMem      0x02         // 00 10
+#define ErrSegv     0x04         // 01 00
 #define NoArgs      {0x00, 0x00}
 
+typedef unsigned char Errorcode;
 typedef unsigned char int8;
 typedef unsigned short int int16;
 typedef unsigned int int32;
@@ -23,6 +27,16 @@ typedef unsigned long long int int64;
 #define $8 (int64)
 #define $c (char *)
 #define $i (int)
+
+#define $ax ->c.r.ax
+#define $bx ->c.r.bx
+#define $cx ->c.r.cx
+#define $dx ->c.r.dx
+#define $ip ->c.r.ip
+#define $sp ->c.r.sp
+
+
+#define segfault(x)     error((x), ErrSegv)
 
 // this is 16 bit vm
 
@@ -53,10 +67,11 @@ typedef struct s_cpu CPU;
 */
 enum s_opcode{
     mov = 0x01,
-    nop = 0x02
+    nop = 0x02,
+    hlt = 0x03,
 };
 
-typedef enum s_opcode Opcode;
+typedef int8 Opcode;
 
 struct s_instrmap{
     Opcode o;
@@ -102,12 +117,17 @@ typedef struct s_vm VM;
 
 static IM instrmap[] = {
     { mov, 0x03},
-    { nop, 0x01}
+    { nop, 0x01},
+    { hlt, 0x01}
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
+void _mov(VM*, Opcode, Args, Args);
  Program *exampleProgram(VM*);
+void execute(VM*);
+void error(VM*, Errorcode);
+void execinstr(VM*, Instruction*);
 int8 map_inst(Opcode);
 VM *virtualMachine(void);
 
