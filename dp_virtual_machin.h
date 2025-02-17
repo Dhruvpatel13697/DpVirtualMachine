@@ -51,6 +51,15 @@ struct s_registers{
     reg sp;
 };
 
+enum registers{
+    ax = 0x00,
+    bx = 0x01,
+    cx = 0x02,
+    dx = 0x03,
+    ip = 0x04,
+    sp = 0x05,
+};
+
 typedef struct s_registers Registers;
 
 struct s_cpu{
@@ -60,15 +69,18 @@ struct s_cpu{
 typedef struct s_cpu CPU;
 
 /*
-    mov ax, 0x05; ( 0x01 or 0x02
-                    0000 0001 => first 1 for mov and second 0 for ax reg
-                    0000 0000 0000 0000 => these 16 bit use for args ex. 0x05
-                    )
+    mov ax, 0x05; 
+    (mov = 0x08 = 0000 1000, ax = 0x00 = 0000 0000,
+     base opcode = 0x08 and final opcode = 0x08 + 0x00 = 0x08
+     0x05 is oprend (size 2 byte) = 0000 0101 0000 0000 (littel endian)
+     so final instraction is 0x08 0x05 0x00
+    )
 */
 enum s_opcode{
-    mov = 0x01,
-    nop = 0x02,
-    hlt = 0x03,
+    mov = 0x08,
+    nop = 0x10,
+    hlt = 0x18,
+    add = 0x20
 };
 
 typedef int8 Opcode;
@@ -118,16 +130,17 @@ typedef struct s_vm VM;
 static IM instrmap[] = {
     { mov, 0x03},
     { nop, 0x01},
-    { hlt, 0x01}
+    { hlt, 0x01},
+    { add, 0x03},
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
-void _mov(VM*, Opcode, Args, Args);
+void _add(VM*, int8, Args, Args);
+void _mov(VM*, int8, Args, Args);
  Program *exampleProgram(VM*);
 void execute(VM*);
 void error(VM*, Errorcode);
-void execinstr(VM*, Instruction*);
 int8 map_inst(Opcode);
 VM *virtualMachine(void);
 

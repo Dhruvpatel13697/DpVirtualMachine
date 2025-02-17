@@ -1,38 +1,101 @@
 /* PROJECTNAME.c */
 #include "dp_virtual_machin.h"
 
-void _mov(VM * vm, Opcode o, Args a1, Args a2){
-    vm $ax = (reg)a1;
+void _mov(VM * vm, int8 dest_reg, Args a1, Args a2){
+    reg r = ((a2 << 8) + a1);
+    switch (dest_reg)
+    {
+    case ax:
+        vm $ax = r;
+        break;
+
+    case bx:
+        vm $bx = r;
+        break;
+
+    case cx:
+        vm $cx = r;
+        break;
+
+    case dx:
+        vm $dx = r;
+        break;
+    
+    default:
+        break;
+    }
 
     return;
 }
 
-void execinstr(VM *vm, Instruction *i){
 
+void _add(VM * vm, int8 dest_reg, Args a1, Args a2){
+    reg r = ((a2 << 8) + a1);
+    switch (dest_reg)
+    {
+    case ax:
+        vm $ax += r;
+        break;
+
+    case bx:
+        vm $bx += r;
+        break;
+
+    case cx:
+        vm $cx += r;
+        break;
+
+    case dx:
+        vm $dx += r;
+        break;
+    
+    default:
+        break;
+    }
+
+    return;
 }
+
 
 void execute(VM *vm){
      Instruction *ip;
      Program *pp;
      int16 size = 0;
+     Opcode opcode;
+     int8 dest_reg;
 
      assert(vm && *vm->m);
      pp = vm->m;
 
 
-     while(((*pp != (Opcode)hlt) & (pp <= (vm->m + vm->b)))){
-        switch (*pp)
+     do{
+        opcode = *pp & (0xf8);
+        switch (opcode)
         {
         case (Opcode)mov:
             size = map_inst(mov);
             ip = (Instruction *)malloc($i size);
             zero($1 ip, size);
             copy($1 ip, $1 pp, size);
-            _mov(vm, ip->o, ip->a[0], ip->a[1]);
+            dest_reg = *pp & 0x07;
+            _mov(vm, dest_reg, ip->a[0], ip->a[1]);
+            break;
+        
+        case (Opcode)add:
+            size = map_inst(add);
+            ip = (Instruction *)malloc($i size);
+            zero($1 ip, size);
+            copy($1 ip, $1 pp, size);
+            dest_reg = *pp & 0x07;
+            _add(vm, dest_reg, ip->a[0], ip->a[1]);
             break;
 
         case (Opcode)nop:
             size = map_inst(nop);
+            break;
+
+        case (Opcode)hlt:
+            error(vm, SysHlt);
             break;
         
         default:
@@ -40,13 +103,10 @@ void execute(VM *vm){
             break;
         }
 
-        // ip = (Instruction *)pp;
-        // size = map_inst(ip->o);
-        // execinstr(vm, ip);
-
         vm $ip += size;  
         pp += size;
-     }
+     }while(((pp <= (vm->m + vm->b))));
+
     if(pp > (vm->m + vm->b)){
         segfault(vm);
     }
@@ -57,10 +117,6 @@ void error(VM *vm, Errorcode e){
 
     int8 exitcode = -1;
 
-    if(vm){
-        free(vm);
-    }
-
     switch (e)
     {
     case ErrSegv:
@@ -69,9 +125,17 @@ void error(VM *vm, Errorcode e){
     case SysHlt:
         fprintf(stderr, "%s\n", "system halted");
         exitcode = 0;
+        printf("after ax       = %.04hx\n", $i vm $ax);
+        printf("after bx       = %.04hx\n", $i vm $bx);
+        printf("after cx       = %.04hx\n", $i vm $cx);
+        printf("after dx       = %.04hx\n", $i vm $dx);
         break;
     default:
         break;
+    }
+
+    if(vm){
+        free(vm);
     }
 
     exit($i exitcode);
@@ -80,7 +144,6 @@ void error(VM *vm, Errorcode e){
 VM *virtualMachine(){
 
     VM *virtual_machine;
-    // Program *prog_pointer;
     int16 size;
 
     size = $2 sizeof(struct s_vm);
@@ -110,54 +173,32 @@ int8 map_inst(Opcode o){
 }
 
 Program *exampleProgram(VM *vm){
-    Program *prog;
-    Instruction *i1, *i2 , *i3;
-    Args a1;
-    int16 s1, s2, s3, sa1;
 
-    s1 = map_inst(mov);
-    s2 = map_inst(nop);
-    s3 = map_inst(hlt);
+    /* 
+    ex prog:
 
+    mov ax, 0x0005;  0x08 0x05 0x00
+    mov bx, 0x0006;  0x09 0x06 0x00
+    nop;             0x90
+    mov cx, 0x0505;  0x0a 0x05 0x05
+    add bx, 0x0006;  0x21 0x06 0x00 
+    hlt;             0x01
+    */
+    // Program *prog;
+    int16 size;
 
-    i1 = (Instruction *)malloc($i s1);
-    i2 = (Instruction *)malloc($i s2);
-    i3 = (Instruction *)malloc($i s3);
-    assert(i1 && i2);
-    zero($1 i1, s1);
-    zero($1 i2, s2);
-    zero($1 i3, s3);
+    size = map_inst(mov) + map_inst(mov) + map_inst(nop)+ map_inst(mov)+ map_inst(add) + map_inst(hlt);
 
-    i1->o = mov;
-    sa1 = s1 - 1;
-    a1 = 0x0005;
-   
-    i2->o = nop;
-    i3->o = hlt;
+    Program p[] = {0x08, 0x05, 0x00, 0x09, 0x06, 0x00, 0x10, 0x0a, 0x05, 0x05, 0x21, 0x06, 0x00, 0x18};
 
-    // load instriction 1 in memory
-    // program_size = (s1 + s2);
-    prog = vm->m;
-    copy($1 prog, $1 i1, 1);
-    prog++;
-    copy($1 prog, &a1, sa1);
-    prog+=sa1;
-   
+    copy($1 vm->m, $1 &p, size);
 
-    //load inst 2 in memory
-    copy($1 prog, $1 i2, 1);
-    prog++;
-    copy($1 prog, $1 i3, 1);
-    vm->b = (s1 + s2 + s3);
+    vm->b = size;
     vm $ip = (reg)vm->m;
     vm $sp = (reg)-1;
-    free(i1);
-    free(i2);
-    free(i3);
 
     return (Program *)(&vm->m);
 
-    
 }
 
 int main(int argc, char *argv[]) {
@@ -170,10 +211,12 @@ int main(int argc, char *argv[]) {
     prog = exampleProgram(vm);
     printf("program  = %p\n", prog);
     printf("ax       = %.04hx\n", $i vm $ax);
+    printf("bx       = %.04hx\n", $i vm $bx);
+    printf("cx       = %.04hx\n", $i vm $cx);
+    printf("dx       = %.04hx\n", $i vm $dx);
 
-    printhex($1 prog, (map_inst(mov) + map_inst(nop) + map_inst(hlt)), ' ');
+    printhex($1 prog, (map_inst(mov) + map_inst(mov) + map_inst(nop)+ map_inst(mov)+ map_inst(add) + map_inst(hlt)), ' ');
     execute(vm);
-    printf("ax after = %.04hx\n", $i vm $ax);
 
     return 0;
 }

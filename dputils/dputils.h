@@ -16,14 +16,8 @@ typedef unsigned int int32;
 /* C */
 void copy(int8*,int8*,int16);
 
-/* N */
-int16 nstoh(int16);
-
 /* P */
 void printhex(int8*,int16,int8);
-
-/* T */
-int8 *todotted(in_addr_t);
 
 /* Z */
 void zero(int8*,int16);
