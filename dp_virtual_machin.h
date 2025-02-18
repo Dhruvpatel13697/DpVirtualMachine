@@ -33,6 +33,7 @@ typedef unsigned long long int int64;
 #define $dx ->c.r.dx
 #define $ip ->c.r.ip
 #define $sp ->c.r.sp
+#define $bp ->c.r.bp
 
 
 #define segfault(x)     error((x), ErrSegv)
@@ -48,6 +49,7 @@ struct s_registers{
     reg dx;
     reg ip;
     reg sp;
+    reg bp;
 };
 
 enum registers{
@@ -57,6 +59,7 @@ enum registers{
     dx = 0x03,
     ip = 0x04,
     sp = 0x05,
+    bp = 0x06,
 };
 
 typedef struct s_registers Registers;

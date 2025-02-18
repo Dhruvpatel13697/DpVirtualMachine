@@ -171,6 +171,7 @@ void execute(VM *vm){
         printf("cx       = %.04hx\n", $i vm $cx);
         printf("dx       = %.04hx\n", $i vm $dx);
         printf("sp       = %.04hx\n", $i vm $sp);
+        printf("bp       = %.04hx\n", $i vm $bp);
         printf("ip       = %.04hx\n", $i vm $ip);
 
      }while((((pp + vm $ip) <= (vm->m + vm->b))));
@@ -257,7 +258,7 @@ Program *exampleProgram(VM *vm){
 0x06    pop dx;          0x33
 0x07    mov bx, 0x0006;  0x09 0x06 0x00
 0x0a    nop;             0x10
-0x0b    jmp 0x0e         0x38 0x0f 0x00
+0x0b    jmp 0x0f         0x38 0x0f 0x00
 0x0e    hlt;             0x18
 0x0f    mov cx, 0x0505;  0x0a 0x05 0x05
 0x12    add bx, 0x0006;  0x21 0x06 0x00 
@@ -284,6 +285,7 @@ Program *exampleProgram(VM *vm){
 
     vm->b = sizeof(p);
     vm $ip = (reg)0;
+    vm $bp = (reg)-1;
     vm $sp = (reg)-1;
 
     return (Program *)(&vm->m);
