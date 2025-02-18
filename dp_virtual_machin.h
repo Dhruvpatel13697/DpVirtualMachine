@@ -1,4 +1,4 @@
-/* PROJECTNAME.h */
+/* dp_virtual_machine.h */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
