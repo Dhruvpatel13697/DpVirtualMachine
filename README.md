@@ -1,81 +1,85 @@
-# DpVirtualMachine
-This is DP's virtual machine.
+# DP's Virtual Machine
 
-It is a basic 16-bit virtual machine with a stack size of 65,535, capable of executing instructions such as MOV, ADD, PUSH, POP, NOP, HLT, etc.
+## Overview
+DP's Virtual Machine (VM) is a basic 16-bit virtual machine designed to execute a single program at a time. It features a stack size of 65,535 and supports several fundamental instructions such as MOV, ADD, PUSH, POP, NOP, and HLT.
 
-This is a single-program VM, meaning it can execute only one program at a time.
+## Features
+- **16-bit architecture**
+- **Single-program execution**
+- **Basic instruction set** including MOV, ADD, PUSH, POP, etc.
+- **Registers**: AX, BX, CX, DX, SP, IP
+- **Memory divided into .text (program) and stack (runtime storage)**
 
-Additionally, this VM includes registers such as AX, BX, CX, DX, SP, IP etc.
+## Instructions
 
-opcode numbering                    total size (immediate only)
+### Opcode Table
+| Instruction | Opcode  | Binary Representation | Size (Bytes) |
+|------------|--------|----------------------|--------------|
+| MOV        | 0x08   | 0000 1000            | 3            |
+| NOP        | 0x10   | 0001 0000            | 1            |
+| HLT        | 0x18   | 0001 1000            | 1            |
+| ADD        | 0x20   | 0010 0000            | 3            |
+| PUSH       | 0x28   | 0010 1000            | 3            |
+| POP        | 0x30   | 0011 0000            | 1            |
 
-MOV  =  0x08  =  0000 1000              (3 Byte)
-NOP  =  0x10  =  0001 0000              (1 Byte)
-HLT  =  0x18  =  0001 1000              (1 Byte)
-ADD  =  0x20  =  0010 0000              (3 Byte)
-PUSH =  0x28  =  0010 1000              (3 Byte)
-POP  =  0x30  =  0010 0000              (1 Byte)
+### Register Table
+| Register | Number | Binary Representation |
+|----------|--------|----------------------|
+| AX       | 0x00   | 0000 0000            |
+| BX       | 0x01   | 0000 0001            |
+| CX       | 0x02   | 0000 0010            |
+| DX       | 0x03   | 0000 0011            |
+| SP       | 0x04   | 0000 0100            |
+| IP       | 0x05   | 0000 0101            |
 
-register numbering
+## Instruction Structure (Immediate Mode Only)
 
-AX = 0x00 = 0000 0000
-BX = 0x01 = 0000 0001
-CX = 0x02 = 0000 0010
-DX = 0x03 = 0000 0011
-SP = 0x04 = 0000 0100
-IP = 0x05 = 0000 0101
+### Example 1: MOV Instruction
+```assembly
+mov ax, 0x0005
+```
+| Opcode | Register | Immediate (Little Endian) |
+|--------|----------|--------------------------|
+| 0x08   | 0x00     | 0x05 0x00                |
+**Final instruction**: `0x08 0x05 0x00` (3 bytes)
 
-instruction structure(implement immidiate only)
+### Example 2: ADD Instruction
+```assembly
+add bx, 0x0506
+```
+| Opcode | Register | Immediate (Little Endian) |
+|--------|----------|--------------------------|
+| 0x20   | 0x01     | 0x06 0x05                |
+**Final instruction**: `0x21 0x06 0x05` (3 bytes)
 
-ex 1:
+### Example 3: PUSH Instruction
+```assembly
+push 0x0506
+```
+| Opcode | Immediate (Little Endian) |
+|--------|--------------------------|
+| 0x28   | 0x06 0x05                |
+**Final instruction**: `0x28 0x06 0x05` (3 bytes)
 
-    mov ax, 0x0005
-    |-----||------|
-    1 B    3 B
-    {
-        (mov = 0x08 ,ax = 0x00) => 1 Byte   => 0x08 + 0x00 => 0x08 => 0000 1000
-        (args = 0x05) => 2 Byte littel endian => 0x05 0x00 => 0000 0101 0000 0000
+This instruction pushes `0x0506` onto the stack and decreases the stack pointer (SP) by the size of `0x0506`.
 
-        final inst => 0x08 0x05 0x00 (3 Byte)
-    }
+## Memory Layout
+The memory is divided into two sections:
+1. **.text** - Holds the program instructions.
+2. **Stack** - Stores runtime values (e.g., pushed values).
 
-ex 2:
-
-    add bx, 0x0506
-    |-----||------|
-      1 B    3 B
-    {
-        (add = 0x20 ,bx = 0x01) => 1 Byte   => 0x20 + 0x01 => 0x21 => 0010 0001
-        (args = 0x0506) => 2 Byte littel endian => 0x06 0x05 => 0000 0101 0000 0110
-
-        final inst => 0x21 0x06 0x05 (3 Byte)
-    }
-
-ex 3:
-
-    push 0x0506   
-    |--| |-----|
-     1B    3B
-    {
-        (push = 0x28) => 1 Byte   => 0x28 => 0010 1000
-        (args = 0x0506) => 2 Byte littel endian => 0x06 0x05 => 0000 0101 0000 0110
-
-        final inst => 0x28 0x06 0x05 (3 Byte)
-    }
-
-    This instruction pushes 0x0506 onto the stack and decreases the stack pointer (SP) by the size of 0x0506.
-
-
-
-How Memory divided:
-
-memory divided into 2 parts first .text where we loads our program and secone part is stack where we store value at run time like push 0x0506.
-
+```
 _______________________________________________________________________________
 |                       |                                                     |
 |                       |                                                     |
 -------------------------------------------------------------------------------
    .text                ^                 stack                               ^
                     break line                                                sp
+```
+
+## Usage
+- Load a program into the **.text** section.
+- Execute instructions sequentially.
+- The stack operates separately for runtime data storage.
 
 
