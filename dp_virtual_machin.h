@@ -82,7 +82,8 @@ enum s_opcode{
     hlt = 0x18,
     add = 0x20,
     push = 0x28,
-    pop = 0x30
+    pop = 0x30,
+    jmp = 0x38,
 };
 
 typedef int8 Opcode;
@@ -103,7 +104,7 @@ struct s_instruction{
 
 typedef struct s_instruction Instruction;
 
-typedef int8 Memory[((int16)(-1))];
+typedef int8 Memory[65535];
 typedef int8 Program;
 
 struct s_vm
@@ -136,6 +137,7 @@ static IM instrmap[] = {
     { add, 0x03},
     { push, 0x03},
     { pop, 0x01},
+    { jmp, 0x03},
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
@@ -144,6 +146,7 @@ void _add(VM*, int8, Args, Args);
 void _mov(VM*, int8, Args, Args);
 void _push(VM*, Args, Args);
 void _pop(VM*, int8);
+void _jmp(VM*, Args, Args);
 Instruction *copy_instruction(Program*, int16);
  Program *exampleProgram(VM*);
 void execute(VM*);
