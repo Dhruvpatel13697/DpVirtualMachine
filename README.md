@@ -70,6 +70,8 @@ ex 3:
 How Memory divided :
 
 memory divided into 2 parts first .text where we loads our program and secone part is stack where we store value at run time like push 0x0506.
+
+ex: 
 -------------------------------------------------------------------------------
 |                       |                                                     |
 |                       |                                                     |
