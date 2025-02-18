@@ -13,7 +13,6 @@
 #define SysHlt      0x01         // 00 01
 #define ErrMem      0x02         // 00 10
 #define ErrSegv     0x04         // 01 00
-#define NoArgs      {0x00, 0x00}
 
 typedef unsigned char Errorcode;
 typedef unsigned char int8;
@@ -127,7 +126,6 @@ there is .text and .data section
 .data (+r +w -e)
 */
 
-typedef Memory *Stack;
 typedef struct s_vm VM;
 
 static IM instrmap[] = {
