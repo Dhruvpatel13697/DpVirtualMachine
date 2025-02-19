@@ -83,45 +83,8 @@ void _cmp(VM *vm, int8 dest_reg, Args a1, Args a2){
 
     return;
 }
-// void _cmp(VM *vm, int8 r, Args a1, Args a2){
-//     reg r = ((a2 << 8) + a1);
-//     switch (dest_reg)
-//     {
-//     case ax:
-//         vm $ax += r;
-//         if(vm $ax < r){
-//             vm $flg = vm $flg | 0x0002; // 0000 0000 0000 0010 
-//         }
-//         if(vm $ax > r){
-//             vm $flg = vm $flg | 0x0004; // 0000 0000 0000 0100
-//         }
-//         if(vm $ax <= r){
-//             vm $flg = vm $flg | 0x0008; // 0000 0000 0000 1000
-//         }
-//         if(vm $ax == r){
-//             vm $flg = vm $flg | 0x0001; // 0000 0000 0000 0001
-//         }
 
-//         break;
 
-//     case bx:
-//         vm $bx += r;
-//         break;
-
-//     case cx:
-//         vm $cx += r;
-//         break;
-
-//     case dx:
-//         vm $dx += r;
-//         break;
-    
-//     default:
-//         segfault(vm);
-//     }
-
-//     return;
-// }
 
 void execute(VM *vm){
      Instruction *ip;
