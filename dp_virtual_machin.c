@@ -57,6 +57,71 @@ void _jmp(VM *vm, Args a1, Args a2){
     vm $ip = ((a2 << 8) + a1);
 }
 
+void _cmp(VM *vm, int8 dest_reg, Args a1, Args a2){
+    vm $flg = 0x0000;
+    int16 r = ((a2 << 8) + a1);
+    
+    reg *dest_r = &vm $ax + $2 dest_reg;
+
+    if(dest_reg < 0x04){
+        if(*dest_r == r){
+            vm $flg = vm $flg | 0x0001; // 0000 0000 0000 0001
+        }
+        else if(*dest_r < r){
+            vm $flg = vm $flg | 0x0002; // 0000 0000 0000 0010 
+        }
+        else if(*dest_r > r){
+            vm $flg = vm $flg | 0x0004; // 0000 0000 0000 0100
+        }
+        
+    }
+    
+
+    else{
+        segfault(vm);
+    }
+
+    return;
+}
+// void _cmp(VM *vm, int8 r, Args a1, Args a2){
+//     reg r = ((a2 << 8) + a1);
+//     switch (dest_reg)
+//     {
+//     case ax:
+//         vm $ax += r;
+//         if(vm $ax < r){
+//             vm $flg = vm $flg | 0x0002; // 0000 0000 0000 0010 
+//         }
+//         if(vm $ax > r){
+//             vm $flg = vm $flg | 0x0004; // 0000 0000 0000 0100
+//         }
+//         if(vm $ax <= r){
+//             vm $flg = vm $flg | 0x0008; // 0000 0000 0000 1000
+//         }
+//         if(vm $ax == r){
+//             vm $flg = vm $flg | 0x0001; // 0000 0000 0000 0001
+//         }
+
+//         break;
+
+//     case bx:
+//         vm $bx += r;
+//         break;
+
+//     case cx:
+//         vm $cx += r;
+//         break;
+
+//     case dx:
+//         vm $dx += r;
+//         break;
+    
+//     default:
+//         segfault(vm);
+//     }
+
+//     return;
+// }
 
 void execute(VM *vm){
      Instruction *ip;
@@ -110,6 +175,14 @@ void execute(VM *vm){
                 _jmp(vm, ip->a[0], ip->a[1]);
                 break;
 
+            case (Opcode)cmp:
+                printf("\ninst = cmp\n");
+                size = map_inst(cmp);
+                ip = copy_instruction((pp + vm $ip), size);
+                dest_reg = *(pp + vm $ip) & 0x07;
+                _cmp(vm, dest_reg, ip->a[0], ip->a[1]);
+                break;
+
             case (Opcode)nop:
                 printf("\ninst = nop\n");
                 size = map_inst(nop);
@@ -138,6 +211,7 @@ void execute(VM *vm){
         printf("sp       = %.04hx\n", $i vm $sp);
         printf("bp       = %.04hx\n", $i vm $bp);
         printf("ip       = %.04hx\n", $i vm $ip);
+        printf("flg      = %.04hx\n", $i vm $flg);
 
      }while((((pp + vm $ip) <= (vm->m + vm->b))));
 
@@ -226,8 +300,10 @@ Program *exampleProgram(VM *vm){
 0x0b    jmp 0x0f         0x38 0x0f 0x00
 0x0e    hlt;             0x18
 0x0f    mov cx, 0x0505;  0x0a 0x05 0x05
-0x12    add bx, 0x0006;  0x21 0x06 0x00 
-0x15    hlt;             0x18
+0x12    cmp bx, 0x0006;  0x41 0x06 0x00
+0x15    add bx, 0x0007;  0x21 0x07 0x00 
+0x18    add cx, 0x0007;  0x22 0x07 0x00
+0x18    hlt;             0x18
     */
     
     Program p[] = {
@@ -239,6 +315,7 @@ Program *exampleProgram(VM *vm){
         0x38, 0x0f, 0x00,
         0x18,
         0x0a, 0x05, 0x05,
+        0x41, 0x06, 0x00,
         0x21, 0x07, 0x00, 
         0x22, 0x07, 0x00, 
         0x18};

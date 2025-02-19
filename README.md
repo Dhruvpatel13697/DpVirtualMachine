@@ -22,6 +22,7 @@ DP's Virtual Machine (VM) is a basic 16-bit virtual machine designed to execute 
 | PUSH       | 0x28   | 0010 1000            | 3            |
 | POP        | 0x30   | 0011 0000            | 1            |
 | jmp        | 0x38   | 0011 1000            | 3            |
+| cmp        | 0x40   | 0100 0000            | 3            |
 ### Register Table
 | Register | Number | Binary Representation |
 |----------|--------|----------------------|

@@ -34,6 +34,7 @@ typedef unsigned long long int int64;
 #define $ip ->c.r.ip
 #define $sp ->c.r.sp
 #define $bp ->c.r.bp
+#define $flg ->c.r.flg
 
 
 #define segfault(x)     error((x), ErrSegv)
@@ -50,6 +51,7 @@ struct s_registers{
     reg ip;
     reg sp;
     reg bp;
+    reg flg;
 };
 
 enum registers{
@@ -60,6 +62,7 @@ enum registers{
     ip  =  0x04,
     sp  =  0x05,
     bp  =  0x06,
+    flg =  0x07,
 };
 
 typedef struct s_registers Registers;
@@ -86,6 +89,8 @@ enum s_opcode{
     push =  0x28,
     pop  =  0x30,
     jmp  =  0x38,
+    cmp  =  0x40,
+       
 };
 
 typedef int8 Opcode;
@@ -139,13 +144,14 @@ static IM instrmap[] = {
     { push, 0x03},
     { pop, 0x01},
     { jmp, 0x03},
+    { cmp, 0x03},
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
 void _add(VM*, int8, Args, Args);
+void _cmp(VM*, int8, Args, Args);
 void _jmp(VM*, Args, Args);
-void _jne(VM*, Args, Args);
 void _mov(VM*, int8, Args, Args);
 void _push(VM*, Args, Args);
 void _pop(VM*, int8);
