@@ -53,13 +53,13 @@ struct s_registers{
 };
 
 enum registers{
-    ax = 0x00,
-    bx = 0x01,
-    cx = 0x02,
-    dx = 0x03,
-    ip = 0x04,
-    sp = 0x05,
-    bp = 0x06,
+    ax  =  0x00,
+    bx  =  0x01,
+    cx  =  0x02,
+    dx  =  0x03,
+    ip  =  0x04,
+    sp  =  0x05,
+    bp  =  0x06,
 };
 
 typedef struct s_registers Registers;
@@ -79,13 +79,13 @@ typedef struct s_cpu CPU;
     )
 */
 enum s_opcode{
-    mov = 0x08,
-    nop = 0x10,
-    hlt = 0x18,
-    add = 0x20,
-    push = 0x28,
-    pop = 0x30,
-    jmp = 0x38,
+    mov  =  0x08,
+    nop  =  0x10,
+    hlt  =  0x18,
+    add  =  0x20,
+    push =  0x28,
+    pop  =  0x30,
+    jmp  =  0x38,
 };
 
 typedef int8 Opcode;
@@ -144,10 +144,13 @@ static IM instrmap[] = {
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
 void _add(VM*, int8, Args, Args);
+void _jmp(VM*, Args, Args);
+void _jne(VM*, Args, Args);
 void _mov(VM*, int8, Args, Args);
 void _push(VM*, Args, Args);
 void _pop(VM*, int8);
-void _jmp(VM*, Args, Args);
+
+
 Instruction *copy_instruction(Program*, int16);
  Program *exampleProgram(VM*);
 void execute(VM*);

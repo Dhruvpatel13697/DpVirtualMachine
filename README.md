@@ -31,6 +31,7 @@ DP's Virtual Machine (VM) is a basic 16-bit virtual machine designed to execute 
 | DX       | 0x03   | 0000 0011            |
 | SP       | 0x04   | 0000 0100            |
 | IP       | 0x05   | 0000 0101            |
+| flg      | 0x06   | 0000 0110            |
 
 ## Instruction Structure (Immediate Mode Only)
 

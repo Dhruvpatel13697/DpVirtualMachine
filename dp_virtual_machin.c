@@ -3,53 +3,29 @@
 
 void _mov(VM * vm, int8 dest_reg, Args a1, Args a2){
     reg r = ((a2 << 8) + a1);
-    switch (dest_reg)
-    {
-    case ax:
-        vm $ax = r;
-        break;
 
-    case bx:
-        vm $bx = r;
-        break;
+    reg *dest_r = &vm $ax + $2 dest_reg;
 
-    case cx:
-        vm $cx = r;
-        break;
+    if(dest_reg < 0x04)
+    *dest_r = r;
 
-    case dx:
-        vm $dx = r;
-        break;
-    
-    default:
+    else{
         segfault(vm);
     }
 
     return;
+
 }
 
 
 void _add(VM * vm, int8 dest_reg, Args a1, Args a2){
     reg r = ((a2 << 8) + a1);
-    switch (dest_reg)
-    {
-    case ax:
-        vm $ax += r;
-        break;
+    reg *dest_r = &vm $ax + $2 dest_reg;
 
-    case bx:
-        vm $bx += r;
-        break;
+    if(dest_reg < 0x04)
+    *dest_r += r;
 
-    case cx:
-        vm $cx += r;
-        break;
-
-    case dx:
-        vm $dx += r;
-        break;
-    
-    default:
+    else{
         segfault(vm);
     }
 
@@ -66,32 +42,21 @@ void _pop(VM *vm, int8 dest_reg){
     vm $sp += sizeof(int16);
     int16 r = *(vm->m + vm $sp);
     
-    switch (dest_reg)
-    {
-    case ax:
-        vm $ax = r;
-        break;
+    reg *dest_r = &vm $ax + $2 dest_reg;
 
-    case bx:
-        vm $bx = r;
-        break;
+    if(dest_reg < 0x04)
+    *dest_r = r;
 
-    case cx:
-        vm $cx = r;
-        break;
-
-    case dx:
-        vm $dx = r;
-        break;
-    
-    default:
+    else{
         segfault(vm);
     }
+
     return;
 }
 void _jmp(VM *vm, Args a1, Args a2){
     vm $ip = ((a2 << 8) + a1);
 }
+
 
 void execute(VM *vm){
      Instruction *ip;
