@@ -32,9 +32,8 @@ void _add(VM * vm, int8 dest_reg, Args a1, Args a2){
     return;
 }
 
-void _push(VM *vm, Args a1, Args a2){
-    int16 val = ((a2 << 8) + a1);
-    *(vm->m + vm $sp) = val;
+void _push(VM *vm, int16 arg){
+    *(vm->m + vm $sp) = arg;
     vm $sp -= sizeof(int16);
 }
 
@@ -72,11 +71,9 @@ void _cmp(VM *vm, int8 dest_reg, Args a1, Args a2){
         }
         else if(*dest_r > r){
             vm $flg = vm $flg | 0x0004; // 0000 0000 0000 0100
-        }
-        
+        }   
     }
     
-
     else{
         segfault(vm);
     }
@@ -84,7 +81,15 @@ void _cmp(VM *vm, int8 dest_reg, Args a1, Args a2){
     return;
 }
 
+void _call(VM *vm, Args a1, Args a2){
 
+    int16 base_addr = vm $bp;
+    _push(vm, vm $ip);             // push ip
+    vm $bp = vm $sp;               // store sp in bp (create new fram)
+    _push(vm, base_addr);          // push base addr
+    _jmp(vm, a1, a2);              // jmp on target addr
+
+}
 
 void execute(VM *vm){
      Instruction *ip;
@@ -120,7 +125,8 @@ void execute(VM *vm){
                 printf("\ninst = push\n");
                 size = map_inst(push);
                 ip = copy_instruction((pp + vm $ip), size);
-                _push(vm, ip->a[0], ip->a[1]);
+                int16 arg = ((ip->a[1] << 8) + ip->a[0]);
+                _push(vm, arg);
                 break;
 
             case (Opcode)pop:
@@ -144,6 +150,13 @@ void execute(VM *vm){
                 ip = copy_instruction((pp + vm $ip), size);
                 dest_reg = *(pp + vm $ip) & 0x07;
                 _cmp(vm, dest_reg, ip->a[0], ip->a[1]);
+                break;
+
+            case (Opcode)call:
+                printf("\ninst = call\n");
+                size = map_inst(cmp);
+                ip = copy_instruction((pp + vm $ip), size);
+                _call(vm, ip->a[0], ip->a[1]);
                 break;
 
             case (Opcode)nop:

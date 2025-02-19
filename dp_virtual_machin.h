@@ -84,6 +84,7 @@ typedef struct s_cpu CPU;
 enum s_opcode{
     mov  =  0x08,
     nop  =  0x10,
+    call =  0x11,
     hlt  =  0x18,
     add  =  0x20,
     push =  0x28,
@@ -145,15 +146,17 @@ static IM instrmap[] = {
     { pop, 0x01},
     { jmp, 0x03},
     { cmp, 0x03},
+    { call, 0x03},
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
 
 void _add(VM*, int8, Args, Args);
 void _cmp(VM*, int8, Args, Args);
+void _call(VM*, Args, Args);
 void _jmp(VM*, Args, Args);
 void _mov(VM*, int8, Args, Args);
-void _push(VM*, Args, Args);
+void _push(VM*, int16);
 void _pop(VM*, int8);
 
 
