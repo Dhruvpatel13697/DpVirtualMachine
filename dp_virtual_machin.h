@@ -84,13 +84,14 @@ typedef struct s_cpu CPU;
 enum s_opcode{
     mov  =  0x08,
     nop  =  0x10,
-    call =  0x11,
     hlt  =  0x18,
     add  =  0x20,
     push =  0x28,
     pop  =  0x30,
     jmp  =  0x38,
     cmp  =  0x40,
+    call =  0x48,
+    ret  =  0x50,
        
 };
 
@@ -147,6 +148,7 @@ static IM instrmap[] = {
     { jmp, 0x03},
     { cmp, 0x03},
     { call, 0x03},
+    { ret, 0x01}
 };
 
 #define sizeOfIM ((sizeof(instrmap)) / (sizeof(instrmap[0])))
@@ -155,15 +157,17 @@ void _add(VM*, int8, Args, Args);
 void _cmp(VM*, int8, Args, Args);
 void _call(VM*, Args, Args);
 void _jmp(VM*, Args, Args);
-void _mov(VM*, int8, Args, Args);
+void _mov(VM*, int8, int16);
 void _push(VM*, int16);
 void _pop(VM*, int8);
+void _ret(VM*);
 
 
 Instruction *copy_instruction(Program*, int16);
  Program *exampleProgram(VM*);
 void execute(VM*);
 void error(VM*, Errorcode);
+int16 get_value_from_offset(VM*, int16);
 int8 map_inst(Opcode);
 VM *virtualMachine(void);
 

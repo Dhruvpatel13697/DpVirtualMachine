@@ -1,17 +1,11 @@
 /* PROJECTNAME.c */
 #include "dp_virtual_machin.h"
 
-void _mov(VM * vm, int8 dest_reg, Args a1, Args a2){
-    reg r = ((a2 << 8) + a1);
+void _mov(VM * vm, int8 dest_reg, int16 arg){
 
     reg *dest_r = &vm $ax + $2 dest_reg;
 
-    if(dest_reg < 0x04)
-    *dest_r = r;
-
-    else{
-        segfault(vm);
-    }
+    *dest_r = arg;
 
     return;
 
@@ -22,12 +16,7 @@ void _add(VM * vm, int8 dest_reg, Args a1, Args a2){
     reg r = ((a2 << 8) + a1);
     reg *dest_r = &vm $ax + $2 dest_reg;
 
-    if(dest_reg < 0x04)
     *dest_r += r;
-
-    else{
-        segfault(vm);
-    }
 
     return;
 }
@@ -39,16 +28,11 @@ void _push(VM *vm, int16 arg){
 
 void _pop(VM *vm, int8 dest_reg){
     vm $sp += sizeof(int16);
-    int16 r = *(vm->m + vm $sp);
+    int16 r = get_value_from_offset(vm, vm $sp);
     
     reg *dest_r = &vm $ax + $2 dest_reg;
 
-    if(dest_reg < 0x04)
     *dest_r = r;
-
-    else{
-        segfault(vm);
-    }
 
     return;
 }
@@ -84,17 +68,29 @@ void _cmp(VM *vm, int8 dest_reg, Args a1, Args a2){
 void _call(VM *vm, Args a1, Args a2){
 
     int16 base_addr = vm $bp;
-    _push(vm, vm $ip);             // push ip
-    vm $bp = vm $sp;               // store sp in bp (create new fram)
-    _push(vm, base_addr);          // push base addr
-    _jmp(vm, a1, a2);              // jmp on target addr
+    _push(vm, vm $ip + map_inst(call));        // push ip
+    vm $bp = vm $sp;                           // mov sp into bp (create new fram)
+    _push(vm, base_addr);                      // push base addr
+    _jmp(vm, a1, a2);                          // jmp on target addr
 
+}
+
+void _ret(VM *vm){
+    int16 base_addr = get_value_from_offset(vm, vm $bp);
+    vm $sp = vm $bp;               // mov bp into sp
+    _mov(vm, bp, base_addr);       // mov base_addr in bp
+    _pop(vm, ip);                  // pop value of ip
+
+}
+
+int16 get_value_from_offset(VM *vm, int16 offset){
+    return *(vm->m + offset);
 }
 
 void execute(VM *vm){
      Instruction *ip;
      Program *pp;
-     int16 size = 0;
+     int16 size = 0, arg;
      Opcode opcode;
      int8 dest_reg;
 
@@ -103,14 +99,16 @@ void execute(VM *vm){
 
      do{
         opcode = *(pp + vm $ip) & (0xf8);
+        printf("opcode = %.02hx, inst = %.02hx",$i opcode, $i *(pp + vm $ip));
         switch (opcode)
         {
             case (Opcode)mov:
-                printf("inst = mov\n");
+                printf("\ninst = mov\n");
                 size = map_inst(mov);
                 ip = copy_instruction((pp + vm $ip), size);
                 dest_reg = *(pp + vm $ip) & 0x07;
-                _mov(vm, dest_reg, ip->a[0], ip->a[1]);
+                arg = ((ip->a[1] << 8) + ip->a[0]);
+                _mov(vm, dest_reg, arg);
                 break;
             
             case (Opcode)add:
@@ -125,7 +123,7 @@ void execute(VM *vm){
                 printf("\ninst = push\n");
                 size = map_inst(push);
                 ip = copy_instruction((pp + vm $ip), size);
-                int16 arg = ((ip->a[1] << 8) + ip->a[0]);
+                arg = ((ip->a[1] << 8) + ip->a[0]);
                 _push(vm, arg);
                 break;
 
@@ -159,6 +157,13 @@ void execute(VM *vm){
                 _call(vm, ip->a[0], ip->a[1]);
                 break;
 
+            case (Opcode)ret:
+                printf("\ninst = ret\n");
+                size = map_inst(ret);
+                ip = copy_instruction((pp + vm $ip), size);
+                _ret(vm);
+                break;
+
             case (Opcode)nop:
                 printf("\ninst = nop\n");
                 size = map_inst(nop);
@@ -174,10 +179,9 @@ void execute(VM *vm){
                 break;
         }
 
-        if(opcode != (Opcode)jmp){
+        if(opcode != (Opcode)jmp && opcode != (Opcode)call && opcode != (Opcode)ret){
             vm $ip += size;
         }
-          
 
         printf("--------------------------------\n");
         printf("ax       = %.04hx\n", $i vm $ax);
@@ -270,21 +274,29 @@ Program *exampleProgram(VM *vm){
 
 0x00    mov ax, 0x0005;  0x08 0x05 0x00
 0x03    push 0x07;       0x28 0x07 0x00
-0x06    pop dx;          0x33
-0x07    mov bx, 0x0006;  0x09 0x06 0x00
-0x0a    nop;             0x10
-0x0b    jmp 0x0f         0x38 0x0f 0x00
-0x0e    hlt;             0x18
-0x0f    mov cx, 0x0505;  0x0a 0x05 0x05
-0x12    cmp bx, 0x0006;  0x41 0x06 0x00
-0x15    add bx, 0x0007;  0x21 0x07 0x00 
-0x18    add cx, 0x0007;  0x22 0x07 0x00
-0x18    hlt;             0x18
+0x06    call 0x0022;     0x48 0x22 0x00  
+0x09    pop dx;          0x33
+0x0a    mov bx, 0x0006;  0x09 0x06 0x00
+0x0d    nop;             0x10
+0x0e    jmp 0x0f         0x38 0x0f 0x00
+0x11    hlt;             0x18
+0x12    mov cx, 0x0505;  0x0a 0x05 0x05
+0x15    cmp bx, 0x0006;  0x41 0x06 0x00
+0x18    add bx, 0x0007;  0x21 0x07 0x00 
+0x1b    add cx, 0x0007;  0x22 0x07 0x00
+0x1e    hlt;             0x18
+0x1f    nop;             0x10
+0x20    nop;             0x10
+0x21    add ax, 0x0006;  0x20 0x06 0x00
+0x24    push 0x08;       0x28 0x07 0x00
+0x27    pop ax;          0x30
+0x28    ret;             0x50
     */
     
     Program p[] = {
         0x08, 0x05, 0x00, 
-        0x28, 0x07, 0x00, 
+        0x28, 0x07, 0x00,
+        0x48, 0x21, 0x00, 
         0x33, 
         0x09, 0x06, 0x00, 
         0x10, 
@@ -294,7 +306,15 @@ Program *exampleProgram(VM *vm){
         0x41, 0x06, 0x00,
         0x21, 0x07, 0x00, 
         0x22, 0x07, 0x00, 
-        0x18};
+        0x18,
+        0x10,
+        0x10,
+        0x20, 0x06, 0x00,
+        0x28, 0x07, 0x00,
+        0x30,
+        0x50
+
+    };
 
     printf("size p = %ld\n", sizeof(p));
     copy($1 &vm->m, $1 &p, sizeof(p));
@@ -319,7 +339,6 @@ int main(int argc, char *argv[]) {
 
     prog = exampleProgram(vm);
     printf("program  = %p\n", prog);
-    printhex($1 prog, (map_inst(mov) + map_inst(push) + map_inst(pop) + map_inst(mov) + map_inst(nop) + map_inst(jmp) + map_inst(hlt) + map_inst(mov) +map_inst(add)+ map_inst(add) +map_inst(hlt)), ' ');
     execute(vm);
 
     return 0;
