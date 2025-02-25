@@ -1,9 +1,13 @@
 /* PROJECTNAME.c */
 #include "dp_virtual_machin.h"
 
+reg *get_reg_addr(VM *vm, int8 reg_num){
+    return &vm $ax + $2 reg_num;
+}
+
 void _mov(VM * vm, int8 dest_reg, int16 arg){
 
-    reg *dest_r = &vm $ax + $2 dest_reg;
+    reg *dest_r = get_reg_addr(vm, dest_reg);
 
     *dest_r = arg;
 
@@ -14,7 +18,7 @@ void _mov(VM * vm, int8 dest_reg, int16 arg){
 
 void _add(VM * vm, int8 dest_reg, Args a1, Args a2){
     reg r = ((a2 << 8) + a1);
-    reg *dest_r = &vm $ax + $2 dest_reg;
+    reg *dest_r = get_reg_addr(vm, dest_reg);
 
     *dest_r += r;
 

@@ -169,6 +169,7 @@ void execute(VM*);
 void error(VM*, Errorcode);
 int16 get_value_from_offset(VM*, int16);
 int8 map_inst(Opcode);
+reg *get_reg_addr(VM*, int8);
 VM *virtualMachine(void);
 
 int main(int,char**);
